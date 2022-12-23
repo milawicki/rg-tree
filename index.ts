@@ -1,31 +1,49 @@
 import { strictEqual } from 'assert';
-import { Nullable, Operator } from './interfaces';
+import { Nullable, Operation, Operator } from './interfaces';
+
+function add(number1: number, number2: number): number {
+  return number1 + number2;
+}
+
+function subtract(number1: number, number2: number): number {
+  return number1 - number2;
+}
+
+function multiply(number1: number, number2: number): number {
+  return number1 * number2;
+}
+
+function divide(number1: number, number2: number): number {
+  return number1 / number2;
+}
+
+function handleOperation(operation: Operator, number1: number, number2: number): number {
+  const operations: Record<Operator, Operation> = {
+    '+': add,
+    '-': subtract,
+    'x': multiply,
+    '÷': divide
+  }
+
+  return operations[operation](number1, number2);
+}
 
 class Node {
   constructor(
     private readonly operator: Nullable<Operator>, 
-    private readonly value: Nullable<number>,
+    private readonly value: number,
     private readonly left: Node,
     private readonly right: Node
   ) {}
 
   result(): number {
-    switch (this.operator) {
-      case '+':
-        return this.left.result() + this.right.result();
-      case '-':
-        return this.left.result() - this.right.result();
-      case 'x':
-        return this.left.result() * this.right.result();
-      case '÷':
-        return this.left.result() / this.right.result();
-      default:
-        return this.value;
-    }
+    return this.operator 
+      ? handleOperation(this.operator, this.left.result(), this.right.result())
+      : this.value;
   }
 
   toString(): string {
-    return this.operator ? `(${this.left.toString()} ${ this.operator } ${this.right.toString()})` : '' + this.value;
+    return this.operator ? `(${ this.left } ${ this.operator } ${ this.right })` : '' + this.value;
   }
 }
 
