@@ -1,13 +1,27 @@
 import { strictEqual } from 'assert';
-import { Nullable, Operation, Operator } from './interfaces';
+import { Nullable, Operation, Operator, TreeElement } from './interfaces';
 
-class Node {
-  readonly left?: Node;
-  readonly right?: Node;
+class Leaf implements TreeElement {
+  constructor(private readonly value: number) { }
 
-  constructor(private readonly value: number, private readonly operator?: Operator, left?: Node | number, right?: Node | number) {
-    this.left = typeof left === 'number' ? new Node(left) : left;
-    this.right = typeof right === 'number' ? new Node(right) : right;
+  result(): number {
+    return this.value;
+  }
+
+  toString(): string {
+    return '' + this.value;
+  }
+}
+
+class Node implements TreeElement {
+  readonly left: TreeElement;
+  readonly right?: TreeElement;
+
+  constructor(value: number)
+  constructor(left: TreeElement | number, operator: Operator, right: TreeElement | number)
+  constructor(left: TreeElement | number, private readonly operator?: Operator, right?: TreeElement | number) {
+    this.left = typeof left === 'number' ? new Leaf(left) : left;
+    this.right = typeof right === 'number' ? new Leaf(right) : right;
   }
 
   private calculate(): number {
@@ -24,22 +38,20 @@ class Node {
   }
 
   result(): number {
-    return this.operator ? this.calculate() : this.value;
+    return this.operator ? this.calculate() : this.left.result();
   }
 
   toString(): string {
-    return this.operator ? `(${ this.left } ${ this.operator } ${ this.right })` : '' + this.value;
+    return this.operator ? `(${ this.left } ${ this.operator } ${ this.right })` : '' + this.left;
   }
 }
 
 const tree = new Node(
-  null,
-  '÷',
-  new Node(null, '+',
-    7,
-    new Node(null, 'x', new Node(null, '-', 3, 2), 5)
-  ),
-  6
+  new Node(
+    7, '+', new Node(
+      new Node(3, '-', 2), 'x', 5)
+    ),
+  '÷', 6
 );
 
 strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", tree.toString());
