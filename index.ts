@@ -1,33 +1,6 @@
 import { strictEqual } from 'assert';
 import { Nullable, Operation, Operator } from './interfaces';
 
-function add(number1: number, number2: number): number {
-  return number1 + number2;
-}
-
-function subtract(number1: number, number2: number): number {
-  return number1 - number2;
-}
-
-function multiply(number1: number, number2: number): number {
-  return number1 * number2;
-}
-
-function divide(number1: number, number2: number): number {
-  return number1 / number2;
-}
-
-function handleOperation(operation: Operator, number1: number, number2: number): number {
-  const operations: Record<Operator, Operation> = {
-    '+': add,
-    '-': subtract,
-    'x': multiply,
-    '÷': divide
-  }
-
-  return operations[operation](number1, number2);
-}
-
 class Node {
   readonly left?: Node;
   readonly right?: Node;
@@ -37,10 +10,21 @@ class Node {
     this.right = typeof right === 'number' ? new Node(right) : right;
   }
 
+  private calculate(): number {
+    const { operator, left, right } = this;
+
+    const operations: Record<Operator, Operation> = {
+      '+': (n1: number, n2: number): number => n1 + n2,
+      '-': (n1: number, n2: number): number => n1 - n2,
+      'x': (n1: number, n2: number): number => n1 * n2,
+      '÷': (n1: number, n2: number): number => n1 / n2,
+    };
+  
+    return operations[operator](left.result(), right.result());
+  }
+
   result(): number {
-    return this.operator 
-      ? handleOperation(this.operator, this.left.result(), this.right.result())
-      : this.value;
+    return this.operator ? this.calculate() : this.value;
   }
 
   toString(): string {
