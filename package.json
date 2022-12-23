@@ -1,0 +1,23 @@
+{
+  "name": "tree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/milawicki/rg-tree.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/milawicki/rg-tree/issues"
+  },
+  "homepage": "https://github.com/milawicki/rg-tree#readme",
+  "devDependencies": {
+    "@types/node": "^18.11.17"
+  }
+}
