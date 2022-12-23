@@ -1,10 +1,10 @@
 import { strictEqual } from 'assert';
-import { Nullable, Operation, Operator, TreeElement } from './interfaces';
+import { Nullable, Operation, Operator, TreeElement, ValueTypes } from './interfaces';
 
-class Leaf implements TreeElement {
-  constructor(private readonly value: number) { }
+class Leaf<T extends ValueTypes> implements TreeElement<T> {
+  constructor(private readonly value: T) { }
 
-  result(): number {
+  result(): T {
     return this.value;
   }
 
@@ -13,31 +13,20 @@ class Leaf implements TreeElement {
   }
 }
 
-class Node implements TreeElement {
-  readonly left: TreeElement;
-  readonly right?: TreeElement;
+abstract class Node<T extends ValueTypes> implements TreeElement<T> {
+  readonly left: TreeElement<T>;
+  readonly right?: TreeElement<T>;
 
-  constructor(value: number)
-  constructor(left: TreeElement | number, operator: Operator, right: TreeElement | number)
-  constructor(left: TreeElement | number, private readonly operator?: Operator, right?: TreeElement | number) {
-    this.left = typeof left === 'number' ? new Leaf(left) : left;
-    this.right = typeof right === 'number' ? new Leaf(right) : right;
+  constructor(value: T)
+  constructor(left: TreeElement<T> | T, operator: Operator, right: TreeElement<T> | T)
+  constructor(left: TreeElement<T> | T, protected readonly operator?: Operator, right?: TreeElement<T> | T) {
+    this.left = typeof left !== 'object' ? new Leaf(left) : left;
+    this.right = typeof right !== 'object' ? right && new Leaf(right) : right;
   }
 
-  private calculate(): number {
-    const { operator, left, right } = this;
+  protected abstract calculate(): T;
 
-    const operations: Record<Operator, Operation> = {
-      '+': (n1: number, n2: number): number => n1 + n2,
-      '-': (n1: number, n2: number): number => n1 - n2,
-      'x': (n1: number, n2: number): number => n1 * n2,
-      '÷': (n1: number, n2: number): number => n1 / n2,
-    };
-  
-    return operations[operator](left.result(), right.result());
-  }
-
-  result(): number {
+  result(): T {
     return this.operator ? this.calculate() : this.left.result();
   }
 
@@ -46,10 +35,29 @@ class Node implements TreeElement {
   }
 }
 
-const tree = new Node(
-  new Node(
-    7, '+', new Node(
-      new Node(3, '-', 2), 'x', 5)
+class ArithmeticNode extends Node<number> {
+  protected calculate(): number {
+    const { operator, left, right } = this;
+
+    if (!operator || !right) {
+      throw new Error('All data need to not defined');
+    }
+
+    const operations: Record<Operator, Operation<number>> = {
+      '+': (n1: number, n2: number): number => n1 + n2,
+      '-': (n1: number, n2: number): number => n1 - n2,
+      'x': (n1: number, n2: number): number => n1 * n2,
+      '÷': (n1: number, n2: number): number => n1 / n2,
+    };
+  
+    return operations[operator](left.result(), right.result());
+  }
+}
+
+const tree = new ArithmeticNode(
+  new ArithmeticNode(
+    7, '+', new ArithmeticNode(
+      new ArithmeticNode(3, '-', 2), 'x', 5)
     ),
   '÷', 6
 );
