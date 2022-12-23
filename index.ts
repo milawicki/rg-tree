@@ -1,61 +1,49 @@
 import { strictEqual } from 'assert';
+import { Nullable, Operator } from './interfaces';
 
-const Node = (operator: any, value: any, left: any, right: any) => {
-  const result = function () {
-    switch (operator) {
-      case "+":
-        return left.result() + right.result();
-      case "-":
-        return left.result() - right.result();
-      case "x":
-        return left.result() * right.result();
-      case "÷":
-        return left.result() / right.result();
+class Node {
+  constructor(
+    private readonly operator: Nullable<Operator>, 
+    private readonly value: Nullable<number>,
+    private readonly left: Node,
+    private readonly right: Node
+  ) {}
+
+  result(): number {
+    switch (this.operator) {
+      case '+':
+        return this.left.result() + this.right.result();
+      case '-':
+        return this.left.result() - this.right.result();
+      case 'x':
+        return this.left.result() * this.right.result();
+      case '÷':
+        return this.left.result() / this.right.result();
       default:
-        return value;
+        return this.value;
     }
-  };
+  }
 
-  const toString = function () {
-    switch (operator) {
-      case "+":
-        return `(${left.toString()} + ${right.toString()})`;
-      case "-":
-        return `(${left.toString()} - ${right.toString()})`;
-      case "x":
-        return `(${left.toString()} x ${right.toString()})`;
-      case "÷":
-        return `(${left.toString()} ÷ ${right.toString()})`;
-      default:
-        return value.toString();
-    }
-  };
+  toString(): string {
+    return this.operator ? `(${this.left.toString()} ${ this.operator } ${this.right.toString()})` : '' + this.value;
+  }
+}
 
-  return {
-    operator,
-    value,
-    left,
-    right,
-    result,
-    toString
-  };
-};
-
-const tree = Node(
-  "÷",
+const tree = new Node(
+  '÷',
   null,
-  Node(
-    "+",
+  new Node(
+    '+',
     null,
-    Node("", 7, null, null),
-    Node(
-      "x",
+    new Node(null, 7, null, null),
+    new Node(
+      'x',
       null,
-      Node("-", null, Node("", 3, null, null), Node("", 2, null, null)),
-      Node("", 5, null, null)
+      new Node('-', null, new Node(null, 3, null, null), new Node(null, 2, null, null)),
+      new Node(null, 5, null, null)
     )
   ),
-  Node("", 6, null, null)
+  new Node(null, 6, null, null)
 );
 
 strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", tree.toString());
