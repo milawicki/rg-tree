@@ -29,12 +29,13 @@ function handleOperation(operation: Operator, number1: number, number2: number):
 }
 
 class Node {
-  constructor(
-    private readonly operator: Nullable<Operator>, 
-    private readonly value: number,
-    private readonly left: Node,
-    private readonly right: Node
-  ) {}
+  readonly left?: Node;
+  readonly right?: Node;
+
+  constructor(private readonly value: number, private readonly operator?: Operator, left?: Node | number, right?: Node | number) {
+    this.left = typeof left === 'number' ? new Node(left) : left;
+    this.right = typeof right === 'number' ? new Node(right) : right;
+  }
 
   result(): number {
     return this.operator 
@@ -48,20 +49,13 @@ class Node {
 }
 
 const tree = new Node(
-  '÷',
   null,
-  new Node(
-    '+',
-    null,
-    new Node(null, 7, null, null),
-    new Node(
-      'x',
-      null,
-      new Node('-', null, new Node(null, 3, null, null), new Node(null, 2, null, null)),
-      new Node(null, 5, null, null)
-    )
+  '÷',
+  new Node(null, '+',
+    7,
+    new Node(null, 'x', new Node(null, '-', 3, 2), 5)
   ),
-  new Node(null, 6, null, null)
+  6
 );
 
 strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", tree.toString());
